@@ -6,8 +6,8 @@ from multiprocessing import Pool #Parallel Processing
 
 #Directories
 stock_data_folder = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Individual Stock Data'  
-results_folder = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtesting/Individual Stock Results'  
-final_results_path = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtesting/Total Results/All_Results.csv'  
+results_folder = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtest/Individual Stock Results'  
+final_results_path = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtest/Total Results/All_Results.csv'  
 os.makedirs(results_folder, exist_ok=True) 
 #Required Columns For Backtest
 required_columns = ['Date', 'Open', 'Close', 'EMA_20', 'EMA_50', 'ADX', 'RSI', 'Sector', 'Volume', 'Upper_BBand', 'Middle_BBand', 'Lower_BBand', 'MACD', 'MACD_Signal', 'MACD_Hist', 'ATR', 'CCI', 'Williams_%R', 'MFI', 'OBV', 'Corresponding ETF', 'SP', 'Market Cap']  # List of required columns for analysis
@@ -24,9 +24,7 @@ def backtest_stock(file_path):
     position = 0 #Initialize Position
     transactions = [] #Initialize List
     for i in range(1, len(df) - 1):
-        if (df.loc[i, 'EMA_20'] > df.loc[i, 'EMA_50'] and #Buy Condition 1
-            df.loc[i, 'ADX'] > 30 and #Buy Condition 2
-            df.loc[i, 'RSI'] > 50): #Buy Condition 3
+        if (df.loc[i, 'SP'] == 1): #Buy Condition 1
             if position == 0: #Ensure Not Already in a Position
                 position = 1  #Enter Buy Position
                 buy_price = df.loc[i + 1, 'Open'] #Set Buy Price to Next Day's Open Price
@@ -34,9 +32,7 @@ def backtest_stock(file_path):
                 for col in required_columns: #Add Required Columns 
                     transaction[col] = df.loc[i + 1, col]
                 transactions.append(transaction) #Append Transaction to List
-        elif (df.loc[i, 'EMA_20'] <= df.loc[i, 'EMA_50'] or #Sell Condition 1
-              df.loc[i, 'ADX'] <= 30 or #Sell Condition 2
-              df.loc[i, 'RSI'] <= 50): #Sell Condition 3
+        elif (df.loc[i, 'SP'] == 0): #Sell Condition 1
             if position == 1:  #Ensure Already in a Position
                 position = 0  #Exit Buy Position
                 sell_price = df.loc[i, 'Close'] #Set Sell Price to Today's Close Price
