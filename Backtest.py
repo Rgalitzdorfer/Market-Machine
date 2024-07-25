@@ -10,7 +10,7 @@ results_folder = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtrat
 final_results_path = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtest/Total Results/All_Results.csv'  
 os.makedirs(results_folder, exist_ok=True) 
 #Required Columns For Backtest
-required_columns = ['Date', 'Open', 'Close', 'EMA_20', 'EMA_50', 'ADX', 'RSI', 'Sector', 'Volume', 'Upper_BBand', 'Middle_BBand', 'Lower_BBand', 'MACD', 'MACD_Signal', 'MACD_Hist', 'ATR', 'CCI', 'Williams_%R', 'MFI', 'OBV', 'Corresponding ETF', 'SP', 'Market Cap']  # List of required columns for analysis
+required_columns = ['Date', 'Open', 'Close', 'EMA_20', 'EMA_50', 'EMA_100', 'ADX', 'RSI', 'Sector', 'Volume', 'Upper_BBand', 'Middle_BBand', 'Lower_BBand', 'MACD', 'MACD_Signal', 'MACD_Hist', 'ATR', 'SAR', 'K_Stoch', 'D_Stoch', 'Corresponding ETF', 'SP', 'Market Cap']  # List of required columns for analysis
 
 
 #Backtest Function
@@ -24,7 +24,11 @@ def backtest_stock(file_path):
     position = 0 #Initialize Position
     transactions = [] #Initialize List
     for i in range(1, len(df) - 1):
-        if (df.loc[i, 'SP'] == 1): #Buy Condition 1
+        if (df.loc[i, 'SP'] == 1 and
+            df.loc[i, 'ADX'] > 30 and 
+            df.loc[i, 'SAR'] > df.loc[i, 'Close'] and
+            df.loc[i, 'Close'] > df.loc[i, 'EMA_100'] and
+            df.loc[i, 'Volume'] > 500000): # Buy Condition 1 #Buy Condition 1
             if position == 0: #Ensure Not Already in a Position
                 position = 1  #Enter Buy Position
                 buy_price = df.loc[i + 1, 'Open'] #Set Buy Price to Next Day's Open Price
@@ -32,7 +36,10 @@ def backtest_stock(file_path):
                 for col in required_columns: #Add Required Columns 
                     transaction[col] = df.loc[i + 1, col]
                 transactions.append(transaction) #Append Transaction to List
-        elif (df.loc[i, 'SP'] == 0): #Sell Condition 1
+        elif (df.loc[i, 'SP'] == 0 or
+              df.loc[i, 'ADX'] < 30 or
+              df.loc[i, 'Close'] < df.loc[i, 'SAR'] or
+              df.loc[i, 'Volume'] < 500000): #Sell Condition 1
             if position == 1:  #Ensure Already in a Position
                 position = 0  #Exit Buy Position
                 sell_price = df.loc[i, 'Close'] #Set Sell Price to Today's Close Price

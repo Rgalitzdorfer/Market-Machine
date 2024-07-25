@@ -66,7 +66,7 @@ for etf, data in etf_data.items():
 #DataFrame
 trending_df = pd.DataFrame(etf_trending).astype(int)
 trending_df.index = pd.to_datetime(trending_df.index)
-trending_file_path = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtesting/ETF_Trending.csv'
+trending_file_path = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtest/ETF_Trending.csv'
 trending_df.to_csv(trending_file_path, index=True)
 print(f"ETF Trending Information Saved at: {trending_file_path}")
 
@@ -79,14 +79,14 @@ plt.xlabel('Date')
 plt.ylabel('Cumulative Return')
 plt.legend(loc='upper left')
 plt.grid(True)
-visualization_file_path = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtesting/ETF_Trend_Visualization.png'
+visualization_file_path = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtest/ETF_Trend_Visualization.png'
 plt.savefig(visualization_file_path)
 print(f"ETF Trend Visualization Saved at: {visualization_file_path}")
 
 #Directories
-base_data_dir = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtesting'
+base_data_dir = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtest'
 individual_data_dir = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Individual Stock Data'
-results_dir = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtesting/Results'
+results_dir = '/Users/ryangalitzdorfer/Downloads/Market Machine/Stock Filtration/Backtest/Results'
 
 #Get Open, Close, High, Low, Volume
 def fetch_stock_data(ticker, start_date, end_date):
@@ -106,13 +106,14 @@ def calculate_indicators(data):
         data['RSI'] = talib.RSI(data['Close'], timeperiod=14) #Relative Strength Index
         data['EMA_20'] = talib.EMA(data['Close'], timeperiod=20) #Moving Average
         data['EMA_50'] = talib.EMA(data['Close'], timeperiod=50) #Moving Average
+        data['EMA_100'] = talib.EMA(data['Close'], timeperiod=100) #Moving Average
         data['Upper_BBand'], data['Middle_BBand'], data['Lower_BBand'] = talib.BBANDS(data['Close'], timeperiod=20) #Bollinger Bands
         data['MACD'], data['MACD_Signal'], data['MACD_Hist'] = talib.MACD(data['Close'], fastperiod=12, slowperiod=26, signalperiod=9) #MACD
         data['ATR'] = talib.ATR(data['High'], data['Low'], data['Close'], timeperiod=14) #ATR
-        data['CCI'] = talib.CCI(data['High'], data['Low'], data['Close'], timeperiod=14) #CCI
-        data['Williams_%R'] = talib.WILLR(data['High'], data['Low'], data['Close'], timeperiod=14) #Williams %
-        data['MFI'] = talib.MFI(data['High'], data['Low'], data['Close'], data['Volume'], timeperiod=14) #Money Flow Index
-        data['OBV'] = talib.OBV(data['Close'], data['Volume']) #On Balance Volume
+        data['SAR'] = talib.SAR(data['High'], data['Low'], acceleration=0.02, maximum=0.2) #Parabolic SAR
+        data['K_Stoch'], data['D_Stoch'] = talib.STOCH(data['High'], data['Low'], data['Close'], #Stochastic
+                                     fastk_period=14, slowk_period=3, slowk_matype=0, 
+                                     slowd_period=3, slowd_matype=0)
         return data
     except Exception as e:
         logging.error(f"Error calculating indicators: {e}")
@@ -142,9 +143,9 @@ def create_dataframe(ticker, etf, sector, start_date, final_end_date):
     df_combined['Sector'] = sector
     df_combined['SP'] = trending_dates.reindex(data.index, fill_value=0)
     df_combined['Market Cap'] = df[df[ticker_column] == ticker]['Market Cap'].values[0]
-    df_combined = df_combined.dropna(subset=['ADX', 'RSI', 'EMA_20', 'EMA_50', 'Upper_BBand', 'Middle_BBand', #Drop NaN Rows
-                                             'Lower_BBand', 'MACD', 'MACD_Signal', 'MACD_Hist', 'ATR', 'CCI', 'Williams_%R',
-                                             'MFI', 'OBV', 'SP'])
+    df_combined = df_combined.dropna(subset=['ADX', 'RSI', 'EMA_20', 'EMA_50', 'EMA_100', 'Upper_BBand', 'Middle_BBand', #Drop NaN Rows
+                                             'Lower_BBand', 'MACD', 'MACD_Signal', 'MACD_Hist', 'ATR', 'SP', 'D_Stoch', 
+                                             'K_Stoch', 'SAR'])
     return df_combined
 
 #Process Single Ticker
@@ -171,7 +172,7 @@ def main():
     ticker_column = 'Ticker'
     etf_column = 'Corresponding ETF'
     sector_column = 'Sector'
-    lookback_start_date = pd.to_datetime('2019-10-01') 
+    lookback_start_date = pd.to_datetime('2019-07-01') 
     final_end_date = pd.to_datetime('2023-12-31')
     tickers = df[ticker_column].unique()
     ticker_info_list = [(ticker, df, ticker_column, etf_column, sector_column, lookback_start_date, final_end_date) for ticker in tickers] #Create List of Tuples
