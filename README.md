@@ -3,8 +3,8 @@ As the Co-founder of Market Machine along with Kieran Griperay, this project com
  
 # Code Breakdown
 ## Libraries Used 
--Panas (DataFrame Manipulation)
--Numpy (Arrays)
+### Panas (DataFrame Manipulation)
+### Numpy (Arrays)
 -Yfinance (Historical Stock Data)
 -TA-Lib (Calculate Technical Indicators)
 -Backtrader (Portfolio Simulation)
