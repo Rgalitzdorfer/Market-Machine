@@ -5,13 +5,13 @@ As the Co-founder of Market Machine along with Kieran Griperay, this project com
 ## Libraries Used 
 ### Panas (DataFrame Manipulation)
 ### Numpy (Arrays)
--Yfinance (Historical Stock Data)
--TA-Lib (Calculate Technical Indicators)
--Backtrader (Portfolio Simulation)
--Matplotlib (Portfolio Visualization)
--Skicit-Learn (Machine Learning)
--TensorFlow (Deep Learning)
--Multiprocessing (Parallel Processing)
+### Yfinance (Historical Stock Data)
+### TA-Lib (Calculate Technical Indicators)
+### Backtrader (Portfolio Simulation)
+### Matplotlib (Portfolio Visualization)
+### Skicit-Learn (Machine Learning)
+### TensorFlow (Deep Learning)
+### Multiprocessing (Parallel Processing)
 
 ## Data Collection (1)
 This file reads a list of NASDAQ and NYSE stocks from a CSV file, maps their sectors to corresponding ETFs, and filters them by a $300 million market cap using parallel processing. The filtered data, including tickers, sectors, market caps, and corresponding sector ETFs containing 3,300 stocks is then saved to a new CSV file.
